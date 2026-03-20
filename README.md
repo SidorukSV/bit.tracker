@@ -47,6 +47,44 @@ cd infra
 docker compose down -v
 ```
 
+## Windows: если ошибка про `dockerDesktopLinuxEngine` pipe
+
+Ошибка вида:
+
+- `failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine`
+- `The system cannot find the file specified`
+
+означает, что **Docker Engine не запущен** (или активен не тот контекст/режим).
+
+Что сделать:
+
+1. Запустите **Docker Desktop**.
+2. Дождитесь статуса **Engine running**.
+3. Переключитесь на **Linux containers** (а не Windows containers).
+4. Проверьте контекст:
+   ```powershell
+   docker context ls
+   docker context use default
+   ```
+5. Проверьте подключение:
+   ```powershell
+   docker version
+   ```
+6. После этого снова:
+   ```powershell
+   cd infra
+   docker compose up -d --build
+   ```
+
+### PowerShell helper-скрипты
+
+Из каталога `infra`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check-docker.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\up.ps1
+```
+
 ## Локальный запуск без Docker (опционально)
 
 1. Поднимите отдельно PostgreSQL и MinIO.
