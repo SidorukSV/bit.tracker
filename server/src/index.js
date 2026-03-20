@@ -5,6 +5,7 @@ import { ensureBucket } from './services/minio.js';
 import authRoutes from './routes/auth.js';
 import teamRoutes from './routes/teams.js';
 import projectRoutes from './routes/projects.js';
+import spaceRoutes from './routes/spaces.js';
 import boardRoutes from './routes/boards.js';
 import taskRoutes from './routes/tasks.js';
 import fileRoutes from './routes/files.js';
@@ -18,6 +19,7 @@ app.use(express.json());
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 
+app.use('/api/spaces', requireAuth, spaceRoutes);
 app.use('/api/teams', requireAuth, teamRoutes);
 app.use('/api/projects', requireAuth, projectRoutes);
 app.use('/api/boards', requireAuth, boardRoutes);

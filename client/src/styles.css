@@ -8,3 +8,5 @@ input { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; width: 100%
 button { padding: 8px 12px; border-radius: 8px; border: none; background: #111827; color: white; cursor: pointer; }
 .error { color: #b91c1c; }
 ul { padding-left: 18px; }
+
+select { padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; width: 100%; }

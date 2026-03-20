@@ -6,12 +6,11 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
-CREATE TABLE IF NOT EXISTS teams (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  parent_team_id UUID REFERENCES teams(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+DO $$ BEGIN
+  CREATE TYPE space_role AS ENUM ('OWNER', 'ADMIN', 'MEMBER');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,14 +21,38 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS spaces (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS space_members (
+  space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role space_role NOT NULL DEFAULT 'MEMBER',
+  PRIMARY KEY (space_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS teams (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  parent_team_id UUID REFERENCES teams(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS team_members (
   team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'MEMBER',
   PRIMARY KEY (team_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
   created_by UUID REFERENCES users(id),
